@@ -316,87 +316,6 @@ function App() {
     }
   }, []);
 
-  // Enhanced classification with AI integration and improved error handling
-  const classifyDocument = useCallback(async () => {
-    if (!selectedFile) {
-      setError('Please select a file first');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setProcessingSteps([]);
-    setExtractedText('');
-    setKeywordMatches({});
-    setAiResults(null);
-
-    try {
-      let documentText = '';
-      
-      if (selectedFile.type === 'application/pdf') {
-        try {
-          documentText = await extractTextFromPdf(selectedFile);
-          setExtractedText(documentText);
-        } catch (pdfError) {
-          console.error('PDF text extraction error:', pdfError);
-          setError(`Failed to extract text from PDF: ${pdfError.message}`);
-          setLoading(false);
-          return;
-        }
-      } else {
-        setError('Invalid file type. Please upload a PDF file.');
-        setLoading(false);
-        return;
-      }
-      
-      console.log('🔍 Starting hybrid classification analysis...');
-      
-      // Method 1: Try AI Classification first
-      let aiClassification = null;
-      try {
-        if (HF_API_KEY && HF_API_KEY.startsWith('hf_')) {
-          console.log('🔑 Using Hugging Face API for AI classification...');
-          setAiStatus('connecting');
-          aiClassification = await classifyWithAI(documentText);
-          setAiStatus('completed');
-        } else {
-          console.log('🤖 Using local AI pattern analysis (no API key configured)...');
-          setProcessingSteps(prev => [...prev, '🤖 Using local AI pattern analysis...']);
-          setAiStatus('processing');
-          aiClassification = await classifyWithSimpleAI(documentText);
-          setAiStatus('completed');
-        }
-        setAiResults(aiClassification);
-      } catch (aiError) {
-        console.log('AI classification failed, falling back to keyword method');
-        setAiStatus('error');
-        setProcessingSteps(prev => [...prev, '⚠️ AI classification unavailable, using keyword analysis...']);
-      }
-      
-      // Method 2: Keyword Classification (as backup/comparison)
-      const keywordResults = classifyByKeywords(documentText);
-      
-      // Method 3: Hybrid Approach - Combine AI and Keywords
-      let finalResults;
-      if (aiClassification) {
-        finalResults = combineAIAndKeywords(aiClassification, keywordResults);
-        setProcessingSteps(prev => [...prev, '🔄 Combining AI and keyword analysis...']);
-      } else {
-        finalResults = keywordResults;
-      }
-      
-      setClassification(finalResults);
-      console.log('📊 Final classification results:', finalResults);
-      setProcessingSteps(prev => [...prev, '✅ Document classification complete!']);
-      
-    } catch (error) {
-      console.error('Error:', error);
-      setError(`An error occurred while processing the document: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedFile, extractTextFromPdf, classifyWithAI, classifyWithSimpleAI, HF_API_KEY]);
-
   // NEW: Combine AI and keyword results with improved logic
   const combineAIAndKeywords = useCallback((aiResults, keywordResults) => {
     console.log('🔄 Combining AI and keyword results...');
@@ -514,6 +433,87 @@ function App() {
 
     return results;
   }, [classificationKeywords]);
+
+  // Enhanced classification with AI integration and improved error handling
+  const classifyDocument = useCallback(async () => {
+    if (!selectedFile) {
+      setError('Please select a file first');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setProcessingSteps([]);
+    setExtractedText('');
+    setKeywordMatches({});
+    setAiResults(null);
+
+    try {
+      let documentText = '';
+      
+      if (selectedFile.type === 'application/pdf') {
+        try {
+          documentText = await extractTextFromPdf(selectedFile);
+          setExtractedText(documentText);
+        } catch (pdfError) {
+          console.error('PDF text extraction error:', pdfError);
+          setError(`Failed to extract text from PDF: ${pdfError.message}`);
+          setLoading(false);
+          return;
+        }
+      } else {
+        setError('Invalid file type. Please upload a PDF file.');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('🔍 Starting hybrid classification analysis...');
+      
+      // Method 1: Try AI Classification first
+      let aiClassification = null;
+      try {
+        if (HF_API_KEY && HF_API_KEY.startsWith('hf_')) {
+          console.log('🔑 Using Hugging Face API for AI classification...');
+          setAiStatus('connecting');
+          aiClassification = await classifyWithAI(documentText);
+          setAiStatus('completed');
+        } else {
+          console.log('🤖 Using local AI pattern analysis (no API key configured)...');
+          setProcessingSteps(prev => [...prev, '🤖 Using local AI pattern analysis...']);
+          setAiStatus('processing');
+          aiClassification = await classifyWithSimpleAI(documentText);
+          setAiStatus('completed');
+        }
+        setAiResults(aiClassification);
+      } catch (aiError) {
+        console.log('AI classification failed, falling back to keyword method');
+        setAiStatus('error');
+        setProcessingSteps(prev => [...prev, '⚠️ AI classification unavailable, using keyword analysis...']);
+      }
+      
+      // Method 2: Keyword Classification (as backup/comparison)
+      const keywordResults = classifyByKeywords(documentText);
+      
+      // Method 3: Hybrid Approach - Combine AI and Keywords
+      let finalResults;
+      if (aiClassification) {
+        finalResults = combineAIAndKeywords(aiClassification, keywordResults);
+        setProcessingSteps(prev => [...prev, '🔄 Combining AI and keyword analysis...']);
+      } else {
+        finalResults = keywordResults;
+      }
+      
+      setClassification(finalResults);
+      console.log('📊 Final classification results:', finalResults);
+      setProcessingSteps(prev => [...prev, '✅ Document classification complete!']);
+      
+    } catch (error) {
+      console.error('Error:', error);
+      setError(`An error occurred while processing the document: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedFile, extractTextFromPdf, classifyWithAI, classifyWithSimpleAI, classifyByKeywords, combineAIAndKeywords, HF_API_KEY]);
 
   const resetApp = useCallback(() => {
     setSelectedFile(null);
