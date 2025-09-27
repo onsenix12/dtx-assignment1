@@ -3,7 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import './App.css';
 
 // Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = `${process.env.PUBLIC_URL}/pdf.worker.min.js`;
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
