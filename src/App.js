@@ -11,6 +11,10 @@ function App() {
   const [classification, setClassification] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [processingSteps, setProcessingSteps] = useState([]);
+  const [extractedText, setExtractedText] = useState('');
+  const [keywordMatches, setKeywordMatches] = useState({});
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
 
   // Simple text-based classification keywords
   const classificationKeywords = {
@@ -75,20 +79,41 @@ function App() {
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
+          console.log('🔍 Starting PDF text extraction...');
+          setProcessingSteps(prev => [...prev, '📄 Reading PDF file...']);
+          
           const arrayBuffer = e.target.result;
+          console.log('📊 PDF loaded, processing with PDF.js...');
+          setProcessingSteps(prev => [...prev, '⚙️ Processing with PDF.js...']);
+          
           const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+          console.log(`📑 PDF has ${pdf.numPages} page(s)`);
+          setProcessingSteps(prev => [...prev, `📑 Found ${pdf.numPages} page(s) to process`]);
+          
           let fullText = '';
           
           // Extract text from all pages
           for (let i = 1; i <= pdf.numPages; i++) {
+            console.log(`📖 Processing page ${i}...`);
+            setProcessingSteps(prev => [...prev, `📖 Extracting text from page ${i}...`]);
+            
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
             const pageText = textContent.items.map(item => item.str).join(' ');
             fullText += pageText + ' ';
+            
+            console.log(`✅ Page ${i} processed: ${pageText.length} characters extracted`);
           }
           
-          resolve(fullText.trim());
+          const finalText = fullText.trim();
+          console.log(`🎯 Text extraction complete: ${finalText.length} total characters`);
+          console.log('📝 Extracted text preview:', finalText.substring(0, 200) + '...');
+          setProcessingSteps(prev => [...prev, `✅ Text extraction complete: ${finalText.length} characters`]);
+          
+          resolve(finalText);
         } catch (error) {
+          console.error('❌ PDF processing error:', error);
+          setProcessingSteps(prev => [...prev, `❌ Error: ${error.message}`]);
           reject(error);
         }
       };
@@ -101,6 +126,9 @@ function App() {
 
     setLoading(true);
     setError(null);
+    setProcessingSteps([]);
+    setExtractedText('');
+    setKeywordMatches({});
 
     try {
       let documentText = '';
@@ -109,6 +137,8 @@ function App() {
       if (selectedFile.type === 'application/pdf') {
         try {
           documentText = await extractTextFromPdf(selectedFile);
+          setExtractedText(documentText);
+          console.log('📝 Full extracted text:', documentText);
         } catch (pdfError) {
           console.error('PDF text extraction error:', pdfError);
           setError('Failed to extract text from PDF. Please try with a different PDF or convert to image.');
@@ -123,9 +153,15 @@ function App() {
         return;
       }
       
+      console.log('🔍 Starting classification analysis...');
+      setProcessingSteps(prev => [...prev, '🔍 Analyzing text for keywords...']);
+      
       // Classify based on extracted text
       const results = classifyByKeywords(documentText);
       setClassification(results);
+      
+      console.log('📊 Classification results:', results);
+      setProcessingSteps(prev => [...prev, '✅ Classification complete!']);
       
     } catch (error) {
       console.error('Error:', error);
@@ -143,21 +179,34 @@ function App() {
       'Delivery Order': 0
     };
 
+    const foundKeywords = {
+      'Invoice': [],
+      'Receipt': [],
+      'Delivery Order': []
+    };
+
+    console.log('🔍 Analyzing text for keyword matches...');
+    console.log('📝 Text to analyze:', lowerText.substring(0, 300) + '...');
 
     // Count keyword matches for each category
     Object.entries(classificationKeywords).forEach(([category, keywords]) => {
       let matchCount = 0;
-      const foundKeywords = [];
       
+      console.log(`\n📋 Checking ${category} keywords:`);
       keywords.forEach(keyword => {
         if (lowerText.includes(keyword.toLowerCase())) {
           matchCount++;
-          foundKeywords.push(keyword);
+          foundKeywords[category].push(keyword);
+          console.log(`  ✅ Found: "${keyword}"`);
         }
       });
       
       scores[category] = matchCount;
+      console.log(`📊 ${category}: ${matchCount} matches found`);
     });
+
+    setKeywordMatches(foundKeywords);
+    console.log('🎯 All keyword matches:', foundKeywords);
 
     // Calculate total matches
     const totalMatches = Object.values(scores).reduce((sum, count) => sum + count, 0);
@@ -202,6 +251,10 @@ function App() {
     setPreview(null);
     setClassification(null);
     setError(null);
+    setProcessingSteps([]);
+    setExtractedText('');
+    setKeywordMatches({});
+    setShowDebugInfo(false);
   };
 
   return (
@@ -271,6 +324,20 @@ function App() {
                 </div>
               )}
 
+              {processingSteps.length > 0 && (
+                <div className="processing-steps">
+                  <h3>⚙️ Processing Steps</h3>
+                  <div className="steps-list">
+                    {processingSteps.map((step, index) => (
+                      <div key={index} className="step-item">
+                        <span className="step-number">{index + 1}</span>
+                        <span className="step-text">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {classification && (
                 <div className="results">
                   <h3>📊 Classification Results</h3>
@@ -293,6 +360,44 @@ function App() {
                       </div>
                     ))}
                   </div>
+                  
+                  <div className="debug-controls">
+                    <button 
+                      onClick={() => setShowDebugInfo(!showDebugInfo)}
+                      className="debug-toggle"
+                    >
+                      {showDebugInfo ? '🔍 Hide' : '🔍 Show'} Processing Details
+                    </button>
+                  </div>
+
+                  {showDebugInfo && (
+                    <div className="debug-info">
+                      <h4>🔍 Keyword Matches Found</h4>
+                      {Object.entries(keywordMatches).map(([category, keywords]) => (
+                        <div key={category} className="keyword-category">
+                          <h5>{category}: {keywords.length} matches</h5>
+                          {keywords.length > 0 ? (
+                            <div className="keyword-list">
+                              {keywords.map((keyword, index) => (
+                                <span key={index} className="keyword-tag">{keyword}</span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="no-matches">No keywords found</p>
+                          )}
+                        </div>
+                      ))}
+                      
+                      <h4>📝 Extracted Text Preview</h4>
+                      <div className="text-preview">
+                        {extractedText.substring(0, 500)}
+                        {extractedText.length > 500 && '...'}
+                      </div>
+                      <p className="text-stats">
+                        Total characters: {extractedText.length}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
