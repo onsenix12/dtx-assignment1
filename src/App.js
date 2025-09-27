@@ -109,7 +109,6 @@ function App() {
       if (selectedFile.type === 'application/pdf') {
         try {
           documentText = await extractTextFromPdf(selectedFile);
-          console.log('Extracted PDF text:', documentText);
         } catch (pdfError) {
           console.error('PDF text extraction error:', pdfError);
           setError('Failed to extract text from PDF. Please try with a different PDF or convert to image.');
@@ -144,8 +143,6 @@ function App() {
       'Delivery Order': 0
     };
 
-    console.log('Extracted text for analysis:', text.substring(0, 200) + '...');
-    console.log('Text length:', text.length);
 
     // Count keyword matches for each category
     Object.entries(classificationKeywords).forEach(([category, keywords]) => {
@@ -160,16 +157,13 @@ function App() {
       });
       
       scores[category] = matchCount;
-      console.log(`${category} matches:`, matchCount, 'Keywords found:', foundKeywords);
     });
 
     // Calculate total matches
     const totalMatches = Object.values(scores).reduce((sum, count) => sum + count, 0);
-    console.log('Total keyword matches:', totalMatches);
     
     // If no matches found, try a more lenient approach
     if (totalMatches === 0) {
-      console.log('No keywords found, using fallback analysis...');
       
       // Look for common business document indicators
       const businessIndicators = ['total', 'amount', 'date', 'number', 'company', 'address'];
@@ -200,7 +194,6 @@ function App() {
       score: Math.round((count / totalMatches) * 100) / 100
     })).sort((a, b) => b.score - a.score);
 
-    console.log('Final classification results:', results);
     return results;
   };
 
