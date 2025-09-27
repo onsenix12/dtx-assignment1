@@ -11,11 +11,15 @@ Visit the live application: [Invoice Classifier](https://onsenix12.github.io/dtx
 ## ✨ Features
 
 - **📁 Drag & Drop Interface**: Intuitive file upload with drag-and-drop support
-- **🔍 Smart Classification**: Automatically categorizes documents using keyword analysis
+- **🤖 AI-Powered Classification**: Uses Hugging Face BART model for zero-shot classification
+- **🔄 Hybrid AI Approach**: Combines AI results (70%) with keyword analysis (30%)
 - **📊 Visual Results**: Beautiful progress bars and confidence scores
 - **📄 PDF Text Extraction**: Extracts text from PDF documents using PDF.js
+- **🛡️ Enhanced Security**: File processing happens entirely client-side
+- **♿ Accessibility**: Full keyboard navigation and screen reader support
 - **📱 Responsive Design**: Works seamlessly on desktop and mobile devices
-- **⚡ Real-time Processing**: Instant classification results
+- **⚡ Real-time Processing**: Instant classification with detailed processing pipeline
+- **🔍 Debug Mode**: Advanced debugging information for AI analysis
 
 ## 🎯 Supported Document Types
 
@@ -35,8 +39,13 @@ The classifier can identify three types of business documents:
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React 19.1.1
-- **PDF Processing**: PDF.js 5.4.149
+- **Frontend**: React 19.1.1 with Hooks optimization
+- **PDF Processing**: PDF.js 5.4.149 with enhanced error handling
+- **AI Classification**: Hugging Face BART model (zero-shot classification)
+- **AI Fallback**: Local pattern analysis with weighted features
+- **Performance**: useCallback, useMemo for optimized rendering
+- **Security**: Client-side processing with file validation
+- **Accessibility**: ARIA labels, keyboard navigation, screen reader support
 - **Styling**: Custom CSS with modern gradients and animations
 - **Build Tool**: Create React App
 - **Deployment**: GitHub Pages
@@ -47,6 +56,7 @@ The classifier can identify three types of business documents:
 
 - Node.js (version 14 or higher)
 - npm or yarn package manager
+- (Optional) Hugging Face API key for enhanced AI classification
 
 ### Installation
 
@@ -61,13 +71,35 @@ The classifier can identify three types of business documents:
    npm install
    ```
 
-3. **Start the development server**
+3. **Configure AI API (Optional but Recommended)**
+   
+   For enhanced AI classification using Hugging Face models:
+   
+   a. Get a free API key from [Hugging Face](https://huggingface.co/settings/tokens)
+   
+   b. Create a `.env` file in the project root:
+   ```bash
+   # Create .env file
+   echo "REACT_APP_HF_API_KEY=your_huggingface_api_key_here" > .env
+   ```
+   
+   c. Replace `your_huggingface_api_key_here` with your actual API key (starts with `hf_`)
+
+4. **Start the development server**
    ```bash
    npm start
    ```
 
-4. **Open your browser**
+5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+### 🤖 AI Configuration
+
+The application uses a **hybrid AI approach**:
+
+- **With API Key**: Uses Hugging Face's BART model for zero-shot classification
+- **Without API Key**: Uses sophisticated local AI pattern analysis
+- **Always**: Combines AI results with keyword analysis for best accuracy
 
 ## 📖 How to Use
 
@@ -117,12 +149,19 @@ dtx-assignment1/
 - Uses PDF.js to extract text content from PDF documents
 - Processes all pages of multi-page documents
 - Handles text-based PDFs (not scanned images)
+- **Enhanced Security**: File size validation (10MB limit) and type checking
+- **Error Handling**: Graceful fallback for corrupted or image-based PDFs
 
-### Classification Algorithm
-1. **Keyword Matching**: Analyzes extracted text against predefined keyword lists
-2. **Scoring System**: Counts keyword matches for each document type
-3. **Confidence Calculation**: Converts match counts to percentage scores
-4. **Fallback Analysis**: Uses business indicators when no keywords are found
+### AI-Powered Classification Algorithm
+1. **🤖 AI Analysis**: 
+   - **With API**: Uses Hugging Face BART model for zero-shot classification
+   - **Without API**: Uses sophisticated local AI pattern analysis with weighted features
+   - **Timeout Protection**: 30-second timeout to prevent hanging requests
+2. **🔍 Keyword Matching**: Analyzes extracted text against predefined keyword lists
+3. **🔄 Hybrid Approach**: Combines AI results (70%) with keyword analysis (30%)
+4. **📊 Confidence Scoring**: Converts AI and keyword scores to percentage confidence
+5. **🛡️ Fallback System**: Uses business indicators when no clear patterns are found
+6. **⚡ Performance**: Optimized with React hooks for better rendering performance
 
 ### Classification Keywords
 
@@ -138,7 +177,13 @@ The system uses comprehensive keyword lists for each document type:
 - **Interactive Elements**: Hover effects, smooth transitions, and animations
 - **Visual Feedback**: Progress bars, badges, and color-coded results
 - **Responsive Layout**: Optimized for all screen sizes
-- **Accessibility**: Clear labels, keyboard navigation, and screen reader support
+- **Enhanced Accessibility**: 
+  - ARIA labels and roles for screen readers
+  - Full keyboard navigation support
+  - Progress bar accessibility with proper values
+  - Alert regions for dynamic content updates
+- **Debug Information**: Toggle-able detailed AI processing information
+- **Status Indicators**: Real-time AI processing status with visual feedback
 
 ## 🚀 Deployment
 
@@ -152,8 +197,18 @@ The application is automatically deployed to GitHub Pages:
 
 - **PDF Text Only**: Works best with PDFs containing extractable text
 - **No OCR Support**: Scanned images within PDFs may not be processed
-- **Keyword-Based**: Relies on text content rather than document structure
+- **File Size Limit**: Maximum 10MB file size for processing
+- **Text Extraction**: Requires PDFs with extractable text (not scanned images)
 - **English Language**: Optimized for English business documents
+- **Internet Required**: Hugging Face API requires internet connection (fallback available)
+
+## 🔒 Security & Privacy
+
+- **Client-Side Processing**: PDF files never leave your browser
+- **Local Text Extraction**: All PDF processing happens locally using PDF.js
+- **Minimal Data Transmission**: Only extracted text snippets (500 chars) sent to AI API
+- **No File Storage**: Documents are not saved or stored anywhere
+- **Privacy Mode**: Can operate entirely offline with local AI analysis
 
 ## 🤝 Contributing
 

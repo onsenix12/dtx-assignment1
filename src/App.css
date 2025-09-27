@@ -489,3 +489,58 @@ body {
   color: #6b7280;
   font-size: 0.9rem;
 }
+
+/* AI Status Indicators */
+.ai-status-indicator {
+  margin-top: 10px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: pulse 2s infinite;
+}
+
+.ai-status.connecting {
+  background: rgba(59, 130, 246, 0.2);
+  color: #1e40af;
+  border: 1px solid #3b82f6;
+}
+
+.ai-status.processing {
+  background: rgba(16, 185, 129, 0.2);
+  color: #059669;
+  border: 1px solid #10b981;
+}
+
+.ai-status.completed {
+  background: rgba(16, 185, 129, 0.3);
+  color: #047857;
+  border: 1px solid #10b981;
+  animation: none;
+}
+
+.ai-status.error {
+  background: rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+  border: 1px solid #ef4444;
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.ai-model-info {
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+}
+
+.ai-model-info p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #0c4a6e;
+}
