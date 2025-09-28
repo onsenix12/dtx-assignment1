@@ -514,7 +514,7 @@ body {
 
 .ai-status.completed {
   background: rgba(16, 185, 129, 0.15);
-  color: #065f46;
+  color: white;
   border: 1px solid #10b981;
   animation: none;
   font-weight: 600;
