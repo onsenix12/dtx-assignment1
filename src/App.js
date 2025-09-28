@@ -337,9 +337,10 @@ function App() {
     }
     
     // Convert keyword results to same format
+    // Normalize keys to lowercase so they match AI labels (HF returns lowercase)
     const keywordMap = {};
     keywordResults.forEach(result => {
-      keywordMap[result.label] = result.score;
+      keywordMap[(result.label || '').toLowerCase()] = result.score;
     });
     
     // Combine with weighted average (70% AI, 30% keywords)
@@ -348,7 +349,7 @@ function App() {
     
     const combinedScores = aiResults.labels.map((label, index) => {
       const aiScore = aiResults.scores[index] || 0;
-      const keywordScore = keywordMap[label] || 0;
+      const keywordScore = keywordMap[(label || '').toLowerCase()] || 0;
       const combinedScore = (aiScore * aiWeight) + (keywordScore * keywordWeight);
       
       return {
