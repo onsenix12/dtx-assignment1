@@ -37,6 +37,8 @@ jobs:
       
     - name: Build
       run: npm run build
+      env:
+        REACT_APP_HF_API_KEY: ${{ secrets.REACT_APP_HF_API_KEY }}
       
     - name: Setup Pages
       uses: actions/configure-pages@v5
